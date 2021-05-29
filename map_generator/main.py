@@ -1,8 +1,13 @@
-from abc import ABCMeta
-from typing import Optional
+SQUARE_SIZE = 11
+COMPLEXITY = 1
+EXIT_ROOMS = 1
 
+ENTRANCE_ROOM_LOCATION = round(SQUARE_SIZE / 2)
 
-def main():
-    if True:
-        return True
-    return True
+# ENTRANCE_EXIT_DIFFERENCE = SQUARE_SIZE / 2
+# ROOMS = (SQUARE_SIZE * COMPLEXITY) - ENTRANCE_ROOMS - EXIT_ROOMS
+
+empty_room = [["x"] * SQUARE_SIZE] * SQUARE_SIZE  # COPY for not overwriting
+empty_room[ENTRANCE_ROOM_LOCATION][ENTRANCE_ROOM_LOCATION] = "o"
+
+[print(row) for row in empty_room]
