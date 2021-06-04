@@ -45,6 +45,15 @@ class ExitRoom(StartingRoom):
 
 class MapGenerator:
     SQUARE_SIZE = 11
+
+    SPECIAL_ROOMS_WAGE = 0.13
+    HARD_ROOMS_WAGE = 0.25
+
+    TOTAL_ROOMS = (SQUARE_SIZE - 2) * (SQUARE_SIZE - 2)
+    SPECIAL_ROOMS = int(SPECIAL_ROOMS_WAGE * TOTAL_ROOMS)
+    HARD_ROOMS = int(HARD_ROOMS_WAGE * TOTAL_ROOMS)
+    EASY_ROOMS = TOTAL_ROOMS - SPECIAL_ROOMS - HARD_ROOMS
+
     START = 0
     END = SQUARE_SIZE - 1
 
@@ -106,6 +115,7 @@ class MapGenerator:
         self.generated_map = self.generate_empty_map()
         self.generate_rooms()
         self.insert_rooms_into_map()
+        print(self.TOTAL_ROOMS, self.SPECIAL_ROOMS, self.HARD_ROOMS, self.EASY_ROOMS)
         return self.generated_map
 
 
