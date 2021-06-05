@@ -1,30 +1,34 @@
-from core.constants import EXIT, MIDDLE, ROOM_KINDS, STARTING
+from core.constants import EASY_PATH, EXIT, MIDDLE, ROOM_KINDS, STARTING
 
 
 class Room:
-    x_position = None
-    y_position = None
+    x = None
+    y = None
     kind = None
     symbol = None
     face = None
 
-    def __init__(self, x_position, y_position, face=None):
-        self.x_position = x_position
-        self.y_position = y_position
+    def __init__(self, x, y, face=None):
+        self.x = x
+        self.y = y
         self.symbol = ROOM_KINDS[self.kind]
         self.face = face or MIDDLE
 
     @property
     def location(self):
-        return self.x_position, self.y_position
+        return self.x, self.y
 
 
 class StartingRoom(Room):
     kind = STARTING
 
-    def __init__(self, x_position, y_position, face):
-        super().__init__(x_position, y_position, face)
+    def __init__(self, x, y, face):
+        super().__init__(x, y, face)
 
 
 class ExitRoom(StartingRoom):
     kind = EXIT
+
+
+class EasyPathRoom(Room):
+    kind = EASY_PATH
