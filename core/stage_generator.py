@@ -66,20 +66,47 @@ class StageGenerator:
         exit_x, exit_y = self.randomize_position_on_face(exit_room_face)
         return ExitRoom(exit_x, exit_y, exit_room_face)
 
-    def insert_easy_path_rooms(self):
-        self.rooms[EASY_PATH] = []
-        min_value = 1
-        starting_left_or_right = self.rooms["STARTING"].x in [0, 10]
-        for x in range(min_value, int(self.END / 2) + min_value):
-            if starting_left_or_right:
-                self.rooms[EASY_PATH].append(
-                    EasyPathRoom(2 * x - 1, randint(1, self.END - 1))
-                )
+    def append_vertical_path_rooms(self, previous_room_x, location):
+        rooms = []
+        for x in range(abs(previous_room_x - location[0])):
+            if previous_room_x > location[0]:
+                rooms.append(EasyPathRoom(previous_room_x - x, location[1]))
             else:
-                self.rooms[EASY_PATH].append(
-                    EasyPathRoom(randint(1, self.END - 1), 2 * x - 1)
-                )
-        # Now need to add connections
+                rooms.append(EasyPathRoom(previous_room_x + x, location[1]))
+        rooms.append(EasyPathRoom(*location))
+        return rooms
+
+    def generate_vertical_path(self, min_value):
+        rooms = []
+        previous_room, last_room = sorted(
+            [self.rooms["STARTING"], self.rooms["EXIT"]],
+            key=lambda obj: obj.face == UP,
+            reverse=True,
+        )
+        previous_room_x = previous_room.x
+        for x in range(min_value, self.END):
+            if rooms:
+                previous_room_x = rooms[-1].x
+            location = (randint(1, self.END - 1), x - 1)
+            rooms.extend(self.append_vertical_path_rooms(previous_room_x, location))
+        rooms.extend(
+            self.append_vertical_path_rooms(rooms[-1].x, (last_room.x, last_room.y - 1))
+        )
+        return rooms
+
+    def generate_horizontal_path(self, min_value):
+        rooms = []
+        for x in range(min_value, int(self.END) + 1):
+            rooms.append(EasyPathRoom(x - 1, randint(1, self.END - 1)))
+        return rooms
+
+    def insert_easy_path_rooms(self):
+        min_value = 2
+        starting_left_or_right = self.rooms["STARTING"].x in [0, 10]
+        if starting_left_or_right:
+            self.rooms[EASY_PATH] = self.generate_horizontal_path(min_value)
+        else:
+            self.rooms[EASY_PATH] = self.generate_vertical_path(min_value)
 
     def get_face(self, x_position, y_position):
         if x_position == 0:
@@ -100,11 +127,10 @@ class StageGenerator:
         for kind, room_or_group in self.rooms.items():
             if isinstance(room_or_group, list):
                 for room in room_or_group:
-                    self.generated_stage[room.y][room.x] = room.symbol
+                    self.generated_stage[room.y][room.x] = room
+                    # self.generated_stage[room.y][room.x] = room.symbol
             else:
-                self.generated_stage[room_or_group.y][
-                    room_or_group.x
-                ] = room_or_group.symbol
+                self.generated_stage[room_or_group.y][room_or_group.x] = room_or_group
 
     def generate_stage(self):
         self.generate_rooms()

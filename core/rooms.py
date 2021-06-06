@@ -14,6 +14,10 @@ class Room:
         self.symbol = ROOM_KINDS[self.kind]
         self.face = face or MIDDLE
 
+    def __repr__(self):
+        # Only for printing purposes
+        return f"'{self.symbol}'"
+
     @property
     def location(self):
         return self.x, self.y
