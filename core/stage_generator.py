@@ -29,11 +29,15 @@ class StageGenerator:
     END = SQUARE_SIZE - 1
 
     generated_stage = None
+    free_slots = None
     rooms = {}
 
     def __init__(self):
         self.generated_stage = [
             [EMPTY_SPACE] * self.SQUARE_SIZE for _ in range(self.SQUARE_SIZE)
+        ]
+        self.free_slots = [
+            (x, y) for x in range(1, self.END) for y in range(1, self.END)
         ]
 
     def is_easy_path_even(self):
@@ -70,9 +74,12 @@ class StageGenerator:
         rooms = []
         for x in range(abs(previous_room_x - location[0])):
             if previous_room_x > location[0]:
+                self.free_slots.remove((previous_room_x - x, location[1]))
                 rooms.append(EasyPathRoom(previous_room_x - x, location[1]))
             else:
+                self.free_slots.remove((previous_room_x + x, location[1]))
                 rooms.append(EasyPathRoom(previous_room_x + x, location[1]))
+        self.free_slots.remove(location)
         rooms.append(EasyPathRoom(*location))
         return rooms
 
@@ -128,7 +135,6 @@ class StageGenerator:
             if isinstance(room_or_group, list):
                 for room in room_or_group:
                     self.generated_stage[room.y][room.x] = room
-                    # self.generated_stage[room.y][room.x] = room.symbol
             else:
                 self.generated_stage[room_or_group.y][room_or_group.x] = room_or_group
 
