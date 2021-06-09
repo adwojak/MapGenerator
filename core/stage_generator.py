@@ -1,5 +1,3 @@
-from random import choice, randint, randrange
-
 from core.constants import (
     DOWN,
     EASY_PATH,
@@ -11,6 +9,7 @@ from core.constants import (
     STARTING,
     UP,
 )
+from core.rnd import rnd
 from core.rooms import EasyPathRoom, ExitRoom, StartingRoom
 
 
@@ -44,13 +43,13 @@ class StageGenerator:
         return abs(self.rooms[STARTING].x - self.rooms[EXIT].x) - 1 % 2 == 0
 
     def randomize_position_on_any_face(self):
-        x_position = randint(self.START, self.END)
+        x_position = rnd.randint(self.START, self.END)
         if x_position in [self.START, self.END]:
-            return [x_position, randrange(self.START + 1, self.END)]
-        return [x_position, choice([self.START, self.END])]
+            return [x_position, rnd.randrange(self.START + 1, self.END)]
+        return [x_position, rnd.choice([self.START, self.END])]
 
     def randomize_position_on_face(self, face):
-        single_coordinate = randint(self.START + 1, self.END - 1)
+        single_coordinate = rnd.randint(self.START + 1, self.END - 1)
         return {
             DOWN: (single_coordinate, self.END),
             UP: (single_coordinate, 0),
@@ -94,7 +93,7 @@ class StageGenerator:
         for x in range(min_value, self.END):
             if rooms:
                 previous_room_x = rooms[-1].x
-            location = (randint(1, self.END - 1), x - 1)
+            location = (rnd.randint(1, self.END - 1), x - 1)
             rooms.extend(self.append_vertical_path_rooms(previous_room_x, location))
         rooms.extend(
             self.append_vertical_path_rooms(rooms[-1].x, (last_room.x, last_room.y - 1))
@@ -104,7 +103,7 @@ class StageGenerator:
     def generate_horizontal_path(self, min_value):
         rooms = []
         for x in range(min_value, int(self.END) + 1):
-            rooms.append(EasyPathRoom(x - 1, randint(1, self.END - 1)))
+            rooms.append(EasyPathRoom(x - 1, rnd.randint(1, self.END - 1)))
         return rooms
 
     def insert_easy_path_rooms(self):
