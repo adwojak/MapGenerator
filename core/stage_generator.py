@@ -17,12 +17,14 @@ class StageGenerator:
     SPECIAL_ROOMS_WAGE = 0.13
     HARD_ROOMS_WAGE = 0.25
 
+    START = 0
+    EASY_PATH_ROOMS_SKIP = 4
+
     def __init__(self):
         self.rooms = {}
-        self.start = 0
-        self.horizontal_length = 8
+        self.horizontal_length = 20
         self.horizontal_end = self.horizontal_length - 1
-        self.vertical_length = 10
+        self.vertical_length = 8
         self.vertical_end = self.vertical_length - 1
         self.total_rooms = (self.horizontal_length - 2) * (self.vertical_length - 2)
         self.special_rooms = int(self.SPECIAL_ROOMS_WAGE * self.total_rooms)
@@ -40,7 +42,7 @@ class StageGenerator:
 
     def randomize_position_on_face(self, face):
         end = self.horizontal_end if face in [UP, DOWN] else self.vertical_end
-        single_coordinate = rnd.randint(self.start + 1, end - 1)
+        single_coordinate = rnd.randint(self.START + 1, end - 1)
         return {
             DOWN: (single_coordinate, self.vertical_end),
             UP: (single_coordinate, 0),
@@ -49,13 +51,16 @@ class StageGenerator:
         }[face]
 
     def _generate_entrance_location(self):
-        x_position = rnd.randint(self.start, self.horizontal_end)
-        if x_position in [self.start, self.horizontal_end]:
-            return [x_position, rnd.randrange(self.start + 1, self.vertical_end)]
-        return [x_position, rnd.choice([self.start, self.vertical_end])]
+        x_position = rnd.randint(self.START, self.horizontal_end)
+        if x_position in [self.START, self.horizontal_end]:
+            return [x_position, rnd.randrange(self.START + 1, self.vertical_end)]
+        return [x_position, rnd.choice([self.START, self.vertical_end])]
 
-    def generate_entrance(self):
-        starting_x, starting_y = self._generate_entrance_location()
+    def generate_entrance(self, face=None):
+        if face:
+            starting_x, starting_y = self.randomize_position_on_face(face)
+        else:
+            starting_x, starting_y = self._generate_entrance_location()
         return StartingRoom(
             starting_x, starting_y, self.get_face(starting_x, starting_y)
         )
@@ -65,6 +70,37 @@ class StageGenerator:
         exit_room_face = OPPOSITE_FACES[starting_room_face]
         exit_x, exit_y = self.randomize_position_on_face(exit_room_face)
         return ExitRoom(exit_x, exit_y, exit_room_face)
+
+    def merge_easy_path_points(self, path_points):
+        rooms = []
+        starting_x, starting_y = self.rooms[STARTING].location
+        exit_location = self.rooms[EXIT].location
+
+        first_point_x, first_point_y = path_points[0]
+        # print(starting_point)
+        # print(exit_location)
+        for x in range(1, self.EASY_PATH_ROOMS_SKIP):
+            difference = abs(starting_y - first_point_y) / x
+            # TODO HERE
+            if starting_y >= first_point_y:
+                print(x, difference)
+        # for point in path_points:
+        #     print(point)
+        return rooms
+
+    def insert_easy_path_rooms(self):
+        rooms = []
+        path_points = []
+        start = self.START + 1
+        end = self.horizontal_end
+        for x in range(
+            max(start, self.EASY_PATH_ROOMS_SKIP), end, self.EASY_PATH_ROOMS_SKIP
+        ):
+            path_points.append((x, rnd.randint(start, self.vertical_end)))
+        for point in path_points:
+            rooms.append(EasyPathRoom(*point))
+        self.rooms[EASY_PATH] = rooms
+        self.rooms[EASY_PATH].extend(self.merge_easy_path_points(path_points))
 
     # def append_vertical_path_rooms(self, previous_room_x, location):
     #     rooms = []
@@ -127,9 +163,9 @@ class StageGenerator:
         #     self.rooms[STARTING] = self.generate_entrance()
         #     self.rooms[x] = self.generate_exit()
 
-        self.rooms[STARTING] = self.generate_entrance()
+        self.rooms[STARTING] = self.generate_entrance(LEFT)
         self.rooms[EXIT] = self.generate_exit()
-        # self.insert_easy_path_rooms()
+        self.insert_easy_path_rooms()
 
     def insert_rooms_into_stage(self):
         for kind, room_or_group in self.rooms.items():
