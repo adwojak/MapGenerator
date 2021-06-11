@@ -77,15 +77,24 @@ class StageGenerator:
         exit_location = self.rooms[EXIT].location
 
         first_point_x, first_point_y = path_points[0]
-        # print(starting_point)
-        # print(exit_location)
-        for x in range(1, self.EASY_PATH_ROOMS_SKIP):
-            difference = abs(starting_y - first_point_y) / x
-            # TODO HERE
-            if starting_y >= first_point_y:
-                print(x, difference)
-        # for point in path_points:
-        #     print(point)
+        y_diff = first_point_y - starting_y + 1
+        x_diff = first_point_x - starting_x - 1
+        rest = 0
+        total = 0
+        for x in range(1, x_diff + 1):
+            rest += y_diff
+            if rest / x_diff > 1:
+                down_count = int(rest / x_diff)
+                total += down_count
+                rest -= x_diff * down_count
+                if x == x_diff - 1 and total == y_diff:
+                    down_count -= 1
+                # TODO Here to fix multiple rooms going down
+                rooms.append(EasyPathRoom(starting_x + x, starting_y + total))
+                print("forward", f"{down_count} down")
+            else:
+                rooms.append(EasyPathRoom(starting_x + x, starting_y + total))
+                print("przod")
         return rooms
 
     def insert_easy_path_rooms(self):
