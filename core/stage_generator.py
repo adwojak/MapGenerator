@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from core.constants import (
     DOWN,
     EASY_PATH,
@@ -11,6 +13,10 @@ from core.constants import (
 )
 from core.rnd import rnd
 from core.rooms import EasyPathRoom, ExitRoom, StartingRoom
+
+
+class EasyPathRoom2(EasyPathRoom):
+    kind = "EASY_PATH2"
 
 
 class StageGenerator:
@@ -73,28 +79,60 @@ class StageGenerator:
 
     def merge_easy_path_points(self, path_points):
         rooms = []
-        starting_x, starting_y = self.rooms[STARTING].location
-        exit_location = self.rooms[EXIT].location
+        path_points.insert(0, self.rooms[STARTING].location)
+        path_points.append(self.rooms[EXIT].location)
+        # for point in range(len(path_points) - 1):
+        for point in range(2):
+            first_point_x, first_point_y = path_points[point]
+            second_point_x, second_point_y = path_points[point + 1]
 
-        first_point_x, first_point_y = path_points[0]
-        y_diff = first_point_y - starting_y + 1
-        x_diff = first_point_x - starting_x - 1
-        rest = 0
-        total = 0
-        for x in range(1, x_diff + 1):
-            rest += y_diff
-            if rest / x_diff > 1:
-                down_count = int(rest / x_diff)
-                total += down_count
-                rest -= x_diff * down_count
-                if x == x_diff - 1 and total == y_diff:
-                    down_count -= 1
-                # TODO Here to fix multiple rooms going down
-                rooms.append(EasyPathRoom(starting_x + x, starting_y + total))
-                print("forward", f"{down_count} down")
-            else:
-                rooms.append(EasyPathRoom(starting_x + x, starting_y + total))
-                print("przod")
+            x_diff = abs(first_point_x - second_point_x) - 1
+            y_diff = abs(first_point_y - second_point_y)
+
+            aa = round(Decimal(y_diff) / Decimal(x_diff), 10)
+            rest = Decimal(0)
+            total = 0
+            for _ in range(x_diff):
+                rest += round(aa, 10)
+                print(aa, rest, rest % 1)
+                # TODO Floating points error
+                if rest >= 1:
+                    vertical_move = int(rest)
+                    total += vertical_move
+                    rest %= 1
+                    if first_point_y > second_point_y:
+                        # rooms.append(EasyPathRoom2(first_point_x + 1 + _, first_point_y - total + 1))
+                        # rooms.append(EasyPathRoom2(first_point_x + 1 + _, first_point_y - total))
+                        print(f"przod i gora {vertical_move}")
+                    else:
+                        # rooms.append(EasyPathRoom2(first_point_x + 1 + _, first_point_y + total - 1))
+                        # rooms.append(EasyPathRoom2(first_point_x + 1 + _, first_point_y + total))
+                        print(f"przod i dol {vertical_move}")
+                else:
+                    # rooms.append(EasyPathRoom2(first_point_x + 1 + _, first_point_y))
+                    print(f"przod")
+        # starting_x, starting_y = self.rooms[STARTING].location
+        # exit_location = self.rooms[EXIT].location
+        #
+        # first_point_x, first_point_y = path_points[0]
+        # y_diff = first_point_y - starting_y + 1
+        # x_diff = first_point_x - starting_x - 1
+        # rest = 0
+        # total = 0
+        # for x in range(1, x_diff + 1):
+        #     rest += y_diff
+        #     if rest / x_diff > 1:
+        #         down_count = int(rest / x_diff)
+        #         total += down_count
+        #         rest -= x_diff * down_count
+        #         if x == x_diff - 1 and total == y_diff:
+        #             down_count -= 1
+        #         # TODO Here to fix multiple rooms going down
+        #         rooms.append(EasyPathRoom(starting_x + x, starting_y + total))
+        #         print("forward", f"{down_count} down")
+        #     else:
+        #         rooms.append(EasyPathRoom(starting_x + x, starting_y + total))
+        #         print("przod")
         return rooms
 
     def insert_easy_path_rooms(self):
