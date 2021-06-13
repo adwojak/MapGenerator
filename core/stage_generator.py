@@ -25,7 +25,6 @@ class StageGenerator:
     HARD_ROOMS_WAGE = 0.25
 
     START = 0
-    EASY_PATH_ROOMS_SKIP = 4
 
     def __init__(self):
         self.rooms = {}
@@ -33,6 +32,7 @@ class StageGenerator:
         self.horizontal_end = self.horizontal_length - 1
         self.vertical_length = 8
         self.vertical_end = self.vertical_length - 1
+        self.easy_path_points_count = 4
         self.total_rooms = (self.horizontal_length - 2) * (self.vertical_length - 2)
         self.special_rooms = int(self.SPECIAL_ROOMS_WAGE * self.total_rooms)
         self.hard_rooms = int(self.HARD_ROOMS_WAGE * self.total_rooms)
@@ -98,7 +98,6 @@ class StageGenerator:
             x_diff = abs(first_point_x - second_point_x) - 1
             y_diff = abs(first_point_y - second_point_y)
             points_difference = round(Decimal(y_diff) / Decimal(x_diff), 10)
-            # 10, 8 - division by 0 error
 
             for _ in range(x_diff):
                 rest = round_value(rest + round(points_difference, 10))
@@ -132,17 +131,19 @@ class StageGenerator:
                                 (x_move, first_point_y + total_vertical_moves - move)
                             )
                 else:
-                    rooms.append((x_move, first_point_y))
+                    if first_point_y > second_point_y:
+                        rooms.append((x_move, first_point_y - total_vertical_moves))
+                    else:
+                        rooms.append((x_move, first_point_y + total_vertical_moves))
         return rooms
 
     def insert_easy_path_rooms(self):
-        start = self.START + 1
-        end = self.horizontal_end
         path_points = [
-            (x, rnd.randint(start, self.vertical_end))
-            for x in range(
-                max(start, self.EASY_PATH_ROOMS_SKIP), end, self.EASY_PATH_ROOMS_SKIP
+            (
+                int((self.horizontal_length - 2) / self.easy_path_points_count) * x,
+                rnd.randint(self.START + 1, self.vertical_end),
             )
+            for x in range(1, self.easy_path_points_count)
         ]
         rooms = [EasyPathRoom(*point) for point in path_points]
         self.rooms[EASY_PATH] = rooms
