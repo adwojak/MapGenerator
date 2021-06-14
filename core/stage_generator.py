@@ -28,9 +28,9 @@ class StageGenerator:
 
     def __init__(self):
         self.rooms = {}
-        self.horizontal_length = 20
+        self.horizontal_length = 8
         self.horizontal_end = self.horizontal_length - 1
-        self.vertical_length = 8
+        self.vertical_length = 20
         self.vertical_end = self.vertical_length - 1
         self.easy_path_points_count = 4
         self.total_rooms = (self.horizontal_length - 2) * (self.vertical_length - 2)
@@ -85,6 +85,57 @@ class StageGenerator:
         path_points.insert(0, starting)
         path_points.append(exiting)
         return path_points
+
+    # def merge_easy_path_points(self, path_points):
+    #     rooms = []
+    #     path_points = self.append_basic_rooms(path_points)
+    #
+    #     for point in range(len(path_points) - 1):
+    #         rest, total_vertical_moves = 0, 0
+    #         first_point_x, first_point_y = path_points[point]
+    #         second_point_x, second_point_y = path_points[point + 1]
+    #
+    #         x_diff = abs(first_point_x - second_point_x) - 1
+    #         y_diff = abs(first_point_y - second_point_y)
+    #         points_difference = round(Decimal(y_diff) / Decimal(x_diff), 10)
+    #
+    #         for _ in range(x_diff):
+    #             rest = round_value(rest + round(points_difference, 10))
+    #             x_move = first_point_x + 1 + _
+    #
+    #             if rest >= 1:
+    #                 vertical_moves = int(rest)
+    #                 total_vertical_moves += vertical_moves
+    #                 rest %= 1
+    #
+    #                 if first_point_y > second_point_y:
+    #                     rooms.append(
+    #                         (
+    #                             x_move,
+    #                             first_point_y - total_vertical_moves + vertical_moves,
+    #                         )
+    #                     )
+    #                     for move in range(vertical_moves):
+    #                         rooms.append(
+    #                             (x_move, first_point_y - total_vertical_moves + move)
+    #                         )
+    #                 else:
+    #                     rooms.append(
+    #                         (
+    #                             x_move,
+    #                             first_point_y + total_vertical_moves - vertical_moves,
+    #                         )
+    #                     )
+    #                     for move in range(vertical_moves):
+    #                         rooms.append(
+    #                             (x_move, first_point_y + total_vertical_moves - move)
+    #                         )
+    #             else:
+    #                 if first_point_y > second_point_y:
+    #                     rooms.append((x_move, first_point_y - total_vertical_moves))
+    #                 else:
+    #                     rooms.append((x_move, first_point_y + total_vertical_moves))
+    #     return rooms
 
     def merge_easy_path_points(self, path_points):
         rooms = []
@@ -170,7 +221,7 @@ class StageGenerator:
         #     self.rooms[STARTING] = self.generate_entrance()
         #     self.rooms[x] = self.generate_exit()
 
-        self.rooms[STARTING] = self.generate_entrance(LEFT)
+        self.rooms[STARTING] = self.generate_entrance(UP)
         self.rooms[EXIT] = self.generate_exit()
         self.insert_easy_path_rooms()
 
