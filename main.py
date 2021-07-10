@@ -5,6 +5,7 @@ map_generator = StageGenerator(
     vertical_length=8,
     horizontal_length=18,
     entrance_face="RIGHT",
+    exit_face="UP",
 )
 # TODO vertical > horizontal, error for LEFT/RIGHT
 # TODO vertical < horizontal, error for UP/DOWN
